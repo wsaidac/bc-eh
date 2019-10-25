@@ -24,7 +24,7 @@ export default {
   data() {
     return {
       res: 'init',
-      msg: 'click me'
+      msg: 'click button'
     }
   },
   mounted() {
