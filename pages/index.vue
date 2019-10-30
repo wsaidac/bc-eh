@@ -3,10 +3,13 @@
     <div>
       <logo />
       <h1 class="title">bc-eh</h1>
-      <h2 class="subtitle">{{ msg }}</h2>
+      <p class="subtitle">
+        profile id: {{ bcProfileId }} <br />
+        interactions id: {{ bcInteractionId }} <br />
+      </p>
       <div class="links">
-        <a target="_blank" class="button--green" @click="showRes">
-          get res
+        <a target="_blank" class="button--green" @click="bcClickHandler">
+          register click event
         </a>
       </div>
     </div>
@@ -14,7 +17,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import Logo from '~/components/Logo.vue'
 
 export default {
@@ -24,17 +26,73 @@ export default {
   data() {
     return {
       res: 'init',
-      msg: 'click button'
+      bcProfileId: 'n/a',
+      bcInteractionId: 'n/a'
+    }
+  },
+  head() {
+    return {
+      script: [
+        {
+          src:
+            '//cg.sb.blueconic.net/frontend/static/javascript/blueconic/blueconic.min.js',
+          type: 'text/javascript'
+        }
+      ]
     }
   },
   mounted() {
-    axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then((response) => (this.res = response))
+    if (
+      typeof window.blueConicClient !== 'undefined' &&
+      typeof window.blueConicClient.event !== 'undefined' &&
+      typeof window.blueConicClient.event.subscribe !== 'undefined'
+    ) {
+      this.bcSubscribeToEvents()
+    } else {
+      // Not yet loaded; wait for the "onBlueConicLoaded" event
+      window.addEventListener(
+        'onBlueConicLoaded',
+        function() {
+          // BlueConic is loaded, now we can do API things
+          this.bcSubscribeToEvents()
+        },
+        false
+      )
+    }
   },
   methods: {
-    showRes() {
-      this.msg = this.res
+    bcSubscribeToEvents() {
+      window.blueConicClient.event.subscribe(
+        window.blueConicClient.event.onBeforeInteractions,
+        {},
+        () => {
+          // BlueConic prelisteners are about to be executed
+          this.bcGetInteractionId()
+          this.bcGetProfileId()
+          this.bcViewHandler()
+        }
+      )
+    },
+    bcGetProfileId() {
+      this.bcProfileId = window.blueConicClient.profile.getProfile().getId()
+    },
+    bcGetInteractionId() {
+      const interactions = window.blueConicClient.getInteractions()
+
+      if (interactions.length > 0) {
+        const variantId = interactions[0].id
+        const interactionId = window.blueConicClient.getInteractionNamesById(
+          variantId
+        ).id
+
+        this.bcInteractionId = interactionId
+      }
+    },
+    bcClickHandler() {
+      window.blueConicClient.createEvent('CLICK', this.bcInteractionId)
+    },
+    bcViewHandler() {
+      window.blueConicClient.createEvent('VIEW', this.bcInteractionId)
     }
   }
 }

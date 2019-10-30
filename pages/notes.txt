@@ -1,0 +1,10 @@
+// const bcViewHandler = blueConicClient.createEvent("VIEW", interactionId)
+
+
+BlueConic is loaded, now we can do API things
+We need the profile id, so we can pass the profile id to get the interaacation ID
+
+pass profile id to get interaction id - rest api?
+
+pass interaction id in view handler
+
