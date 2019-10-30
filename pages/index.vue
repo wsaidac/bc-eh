@@ -89,9 +89,11 @@ export default {
       }
     },
     bcClickHandler() {
+      if (!window.blueConicClient && !this.bcInteractionId) return undefined
       window.blueConicClient.createEvent('CLICK', this.bcInteractionId)
     },
     bcViewHandler() {
+      if (!window.blueConicClient && !this.bcInteractionId) return undefined
       window.blueConicClient.createEvent('VIEW', this.bcInteractionId)
     }
   }
